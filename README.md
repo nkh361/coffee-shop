@@ -2,7 +2,7 @@
 SE430 - Group 6
 
 ## Objective
-    Create a coffee shop application where customers can log in, select their coffee
+Create a coffee shop application where customers can log in, select their coffee
 orders from a nearby coffee shop that sells the item. Shop A might not carry the item that
 the customer is requesting, but another nearby shop B has it on the menu. The app will
 function as a mediator between the user and coffee shops that are local to the user. The
@@ -10,7 +10,7 @@ application ensures that customers can easily log in, search for coffee items, a
 orders from shops that have the item available (not just the user’s default store).
 
 ## Scope
-    The scope of this project includes the user/shop login, item search, shop availability check, and order placement.
+The scope of this project includes the user/shop login, item search, shop availability check, and order placement.
 Processes not included in our scope can be described as functionalities pertaining to automated location tracking and payment system.
 
 ---
