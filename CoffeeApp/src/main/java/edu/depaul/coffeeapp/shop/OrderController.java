@@ -1,6 +1,8 @@
 package edu.depaul.coffeeapp.shop;
 
+import edu.depaul.coffeeapp.shop.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,15 +16,18 @@ public class OrderController {
     @Autowired
     private OrderRepository orderRepository;
 
+    private OrderService orderService;
+
     /**
      * Responsible for invoking UC-003
-     * @param orderDTO      DTO of order
-     * @return
-     * @throws Exception
+     * @param order      Order object of customer order
+     * @return           ResponseEntity of Order DTO
+     * @throws Exception Throws exception if the order could not be fulfilled
      */
     @PostMapping
-    public ResponseEntity<OrderDTO> placeOrder(@RequestBody OrderDTO orderDTO) throws Exception {
-        throw new Exception("Not implemented yet");
+    public ResponseEntity<OrderDTO> placeOrder(@RequestBody Order order) throws Exception {
+        OrderDTO orderDTO = orderService.placeOrder(order);
+        return new ResponseEntity<>(orderDTO, HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
