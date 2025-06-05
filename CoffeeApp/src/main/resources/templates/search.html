@@ -10,8 +10,8 @@
 
 <script>
   function searchCoffeeItem() {
-    cost query = document.getElementById("searchBar").value;
-    if (query.length == 0) {
+    const query = document.getElementById("searchBar").value;
+    if (query.length === 0) {
       document.getElementById("results").innerHTML = "Start typing...";
       return;
     }
