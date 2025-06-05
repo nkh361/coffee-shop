@@ -1,8 +1,11 @@
 package edu.depaul.coffeeapp.shop;
 
 import edu.depaul.coffeeapp.notification.NotificationService;
+import org.aspectj.weaver.ast.Or;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
 
 /**
  * Business logic for shop system
@@ -18,11 +21,24 @@ public class OrderService {
      * Responsible for triggering the order mechanism.
      * Method should convert to an order entity and set a new status for the order. After saving the order to
      * repository, the notification service should notify the shop.
-     * @param orderDTO      DTO of order
+     * @param order         Order object of order
      * @return              conversion of order to saved order
-     * @throws Exception
+     * @throws Exception    order could not be placed
      */
-    public OrderDTO placeOrder(OrderDTO orderDTO) throws Exception {
-        throw new Exception("Not implemented yet");
+    public OrderDTO placeOrder(Order order) throws Exception {
+        try {
+            order.setOrderTime(LocalDateTime.now());
+            Order saved = orderRepository.save(order);
+
+            return new OrderDTO(
+                    saved.getId(),
+                    saved.getCustomer(),
+                    saved.getShopId(),
+                    saved.getOrderTime(),
+                    saved.getItems()
+            );
+        } catch (Exception e) {
+            throw new Exception("Order could not be placed: " + e.getMessage());
+        }
     }
 }

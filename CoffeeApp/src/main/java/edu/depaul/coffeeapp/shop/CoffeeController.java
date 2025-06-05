@@ -14,6 +14,12 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/coffee")
+/**
+ * The coffee controller is responsible for initializing the cafe menu.
+ *
+ * All coffee items should be placed into a Map(String, CoffeeItem) object, which will be collectively added to
+ * a Map(String, Map(String, CoffeeItem)) object.
+ */
 public class CoffeeController {
     private Map<String, Map<String, CoffeeItem>> coffeeMenu = new HashMap<>();
 
