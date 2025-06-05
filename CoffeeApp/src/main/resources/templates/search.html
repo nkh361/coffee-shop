@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Search Coffee Item</title>
+</head>
+<body>
+<input type="text" id="searchBar" placeholder="Search Coffee Item" onkeyup="searchCoffeeItem()"/>
+<ul id="results"></ul>
+
+<script>
+  function searchCoffeeItem() {
+    cost query = document.getElementById("searchBar").value;
+    if (query.length == 0) {
+      document.getElementById("results").innerHTML = "Start typing...";
+      return;
+    }
+
+    fetch('/api/coffee/search?query=${encodeURIComponent(query)}')
+            .then(response => response.json())
+            .then(data => {
+              const resultList = document.getElementById("results");
+              resultList.innerHTML = "";
+              data.forEach(item => {
+                const li = document.createElement("li");
+                li.innerText = `${item.name}`;
+                resultList.appendChild(li);
+              });
+            });
+  }
+</script>
+</body>
+</html>
