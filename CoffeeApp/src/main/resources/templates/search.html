@@ -16,31 +16,52 @@
 <ul id="results"></ul>
 
 <script>
-  function searchCoffeeItem() {
-    const query = document.getElementById("searchBar").value;
-    if (query.length === 0) {
-      document.getElementById("results").innerHTML = "Start typing...";
-      return;
-    }
+    function searchCoffeeItem() {
+        const query = document.getElementById("searchBar").value;
+        const shop = document.getElementById("shopSelect").value;
 
-      const shop = document.getElementById("shopSelect").value;
-      fetch(`/api/coffee/search?query=${encodeURIComponent(query)}&shop=${encodeURIComponent(shop)}`)
-              .then(response => {
-            if (!response.ok) throw new Error("Network response was not ok");
-            return response.json();
-        })
-        .then(data => {
-            const resultList = document.getElementById("results");
-            resultList.innerHTML = "";
-            data.forEach(item => {
-                const li = document.createElement("li");
-                li.innerText = item.name;
-                resultList.appendChild(li);
-            });
-        })
-        .catch(error => {
-            console.error("Error during fetch:", error);
-        });
+          if (query.length === 0) {
+              document.getElementById("results").innerHTML = "Start typing...";
+              return;
+          }
+
+          fetch(`/api/coffee/search?query=${encodeURIComponent(query)}&shop=${encodeURIComponent(shop)}`)
+              .then(response => response.json())
+              .then(data => {
+                  const resultList = document.getElementById("results");
+                  resultList.innerHTML = "";
+
+                  if (data.here.length > 0) {
+                      const hereHeader = document.createElement("li");
+                      hereHeader.innerText = "✅ Available at your cafe:";
+                      resultList.appendChild(hereHeader);
+
+                      data.here.forEach(item => {
+                          const li = document.createElement("li");
+                          li.innerText = item.name;
+                          resultList.appendChild(li);
+                      });
+                  } else if (data.elsewhere.length > 0) {
+                      const elsewhereHeader = document.createElement("li");
+                      elsewhereHeader.innerText = "☕ Not here, but available at other cafes:";
+                      resultList.appendChild(elsewhereHeader);
+
+                      data.elsewhere.forEach(item => {
+                          const li = document.createElement("li");
+                          // FIXME: shopId name fix
+                          li.innerText = `${item.name} (at ${item.shopId})`;
+                          resultList.appendChild(li);
+                      });
+                  } else {
+                      const li = document.createElement("li");
+                      li.innerText = "❌ No match found in any cafe.";
+                      resultList.appendChild(li);
+                  }
+              })
+              .catch(error => {
+                  console.error("Error during fetch:", error);
+              });
+
   }
 </script>
 </body>

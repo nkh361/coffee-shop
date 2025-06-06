@@ -47,29 +47,40 @@ public class CoffeeController {
         coffeeMenu.put("cafe2", cafe2);
     }
 
-//    @GetMapping("/search")
-//    public ResponseEntity<List<CoffeeItem>> searchCoffee(@RequestParam String name) {
-//        String lowerCaseName = name.toLowerCase();
-//        List<CoffeeItem> results = new ArrayList<>();
-//        for (Map<String, CoffeeItem> shopMenu : coffeeMenu.values()) {
-//            for (CoffeeItem coffeeItem : shopMenu.values()) {
-//                if (coffeeItem.getName().toLowerCase().contains(lowerCaseName)) {
-//                    results.add(coffeeItem);
-//                }
-//            }
-//        }
-//        return ResponseEntity.ok(results);
-//
-//    }
     @GetMapping("/search")
-    public List<CoffeeItem> searchCoffee(
+    public Map<String, List<CoffeeItem>> searchCoffee(
             @RequestParam("query") String name,
             @RequestParam("shop") String shopId
     ) {
-        Map<String, CoffeeItem> menu = getMenuForShop(shopId);
-        return menu.values().stream()
-                .filter(item -> item.getName().toLowerCase().contains(name.toLowerCase()))
+//        Map<String, CoffeeItem> menu = getMenuForShop(shopId);
+//        return menu.values().stream()
+//                .filter(item -> item.getName().toLowerCase().contains(name.toLowerCase()))
+//                .collect(Collectors.toList());
+        String lowerCaseName = name.toLowerCase();
+        Map<String, CoffeeItem> currentMenu = getMenuForShop(shopId);
+
+        List<CoffeeItem> availableHere = currentMenu.values().stream()
+                .filter(item -> item.getName().toLowerCase().contains(lowerCaseName))
                 .collect(Collectors.toList());
+
+        List<CoffeeItem> availableElsewhere = new ArrayList<>();
+        if (availableHere.isEmpty()) {
+            for (Map.Entry<String, Map<String, CoffeeItem>> entry : coffeeMenu.entrySet()) {
+                String otherShopId = entry.getKey();
+                if (!otherShopId.equalsIgnoreCase(shopId)) {
+                    availableElsewhere.addAll(
+                            entry.getValue().values().stream()
+                                    .filter(item -> item.getName().toLowerCase().contains(lowerCaseName))
+                                    .collect(Collectors.toList())
+                    );
+                }
+            }
+        }
+
+        Map<String, List<CoffeeItem>> result = new HashMap<>();
+        result.put("here", availableHere);
+        result.put("elsewhere", availableElsewhere);
+        return result;
     }
 
     public Map<String, CoffeeItem> getMenuForShop(String shopId) {
