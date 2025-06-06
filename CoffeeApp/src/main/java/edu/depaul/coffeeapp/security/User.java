@@ -1,6 +1,8 @@
 package edu.depaul.coffeeapp.security;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * User entity
@@ -12,7 +14,10 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Getter
+    @Setter
     private String username;
+
     private String password;
     private String type;    // customer or shop
 
