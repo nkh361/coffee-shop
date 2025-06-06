@@ -18,7 +18,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
-                        .defaultSuccessUrl("/", true)
+                        .defaultSuccessUrl("/search", true)
                 );
 
         return http.build();
