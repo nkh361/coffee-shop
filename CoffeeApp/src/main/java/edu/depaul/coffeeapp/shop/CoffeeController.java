@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
  * a Map(String, Map(String, CoffeeItem)) object.
  */
 public class CoffeeController {
+    private OrderService orderService = new OrderService();
     private Map<String, Map<String, CoffeeItem>> coffeeMenu = new HashMap<>();
 
     @PostConstruct
@@ -78,11 +79,11 @@ public class CoffeeController {
         return result;
     }
 
-//    @PostMapping("/orders/checkout")
-//    public ResponseEntity<ReceiptDTO> checkout(@RequestBody Order request) throws Exception {
-//        ReceiptDTO receipt = orderService.checkoutOrder(request);
-//        return ResponseEntity.ok(receipt);
-//    }
+    @PostMapping("/orders/checkout")
+    public ResponseEntity<OrderDTO> checkout(@RequestBody Order request) throws Exception {
+        OrderDTO receipt = orderService.placeOrder(request);
+        return ResponseEntity.ok(receipt);
+    }
 
 
     public Map<String, CoffeeItem> getMenuForShop(String shopId) {

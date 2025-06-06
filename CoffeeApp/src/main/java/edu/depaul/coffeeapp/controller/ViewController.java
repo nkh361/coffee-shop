@@ -10,4 +10,9 @@ public class ViewController {
     public String search() {
         return "search";
     }
+
+    @GetMapping("/receipt")
+    public String receipt() {
+        return "receipt";
+    }
 }

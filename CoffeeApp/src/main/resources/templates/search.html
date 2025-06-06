@@ -134,14 +134,31 @@
 
     function checkout() {
         const customerName = document.getElementById("customerName").value;
+        const shopSelect = document.getElementById("shopSelect").value;
+
         if (!customerName) {
             alert("Please enter your name.");
             return;
         }
 
+        if (cart.length === 0) {
+            alert("Your cart is empty. Add items before checkout.");
+            return;
+        }
+
+        // Extract just the item names for the backend
+        const itemNames = cart.map(item => item.name);
+
+        // Extract shop ID (remove "cafe" prefix if present)
+        const shopId = shopSelect.startsWith("cafe")
+            ? parseInt(shopSelect.replace("cafe", ""))
+            : 1; // default to cafe1 if format is unexpected
+
         const orderRequest = {
-            items: cart,
-            customerName: customerName
+            customer: customerName,  // matches your Order entity field
+            items: itemNames,       // List<String> as expected by backend
+            shopId: shopId,         // numeric shop ID
+            status: "NEW"           // initial status
         };
 
         fetch("/api/orders/checkout", {
@@ -149,13 +166,29 @@
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(orderRequest)
         })
-            .then(res => res.json())
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error(`HTTP error! status: ${res.status}`);
+                }
+                return res.json();
+            })
             .then(order => {
+                if (!order || !order.id) {
+                    throw new Error("Invalid order response - missing ID");
+                }
+
                 cart.length = 0; // clear the cart
                 renderCart();
-                displayReceipt(order);
+
+                // Redirect to receipt page
+                window.location.href = `/receipt/${order.id}`;
+            })
+            .catch(err => {
+                console.error("Checkout error:", err);
+                alert(`❌ Checkout failed: ${err.message}`);
             });
     }
+
 
     function displayReceipt(order) {
         const receiptDiv = document.getElementById("receipt");

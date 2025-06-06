@@ -37,8 +37,9 @@ public class OrderService {
      */
     public OrderDTO placeOrder(Order order) throws Exception {
         try {
-            Optional<User> customer = userRepository.findByUsername(order.getCustomer());
-            if (customer.isEmpty()) throw new Exception("Customer not found");
+            if (order.getCustomer() == null || order.getCustomer().isEmpty()) {
+                throw new Exception("Customer name is required");
+            }
 
             Map<String, CoffeeItem> shopMenu = coffeeController.getMenuForShop("cafe" + (int) order.getShopId());
             if (shopMenu.isEmpty()) throw new Exception("Shop not found");
@@ -72,20 +73,36 @@ public class OrderService {
             }
              */
 
+            double total = 0;
+            for (String item : validItems) {
+                total += shopMenu.get(item).getPrice();
+            }
+            order.setTotal(total);
+
 
             order.setOrderTime(LocalDateTime.now());
             Order saved = orderRepository.save(order);
 
-            return new OrderDTO(
-                    saved.getId(),
-                    saved.getCustomer(),
-                    saved.getShopId(),
-                    saved.getOrderTime(),
-                    saved.getItems(),
-                    saved.getStatus()
-            );
+            return toDTO(saved);
         } catch (Exception e) {
             throw new Exception("Order could not be placed: " + e.getMessage());
         }
+    }
+
+    /**
+     * Helper function for making the DTO
+     * @param order     Order object details
+     * @return          OrderDTO type
+     */
+    public OrderDTO toDTO(Order order) {
+        return new OrderDTO(
+                order.getId(),
+                order.getCustomer(),
+                order.getShopId(),
+                order.getOrderTime(),
+                order.getItems(),
+                order.getStatus(),
+                order.getTotal()
+        );
     }
 }

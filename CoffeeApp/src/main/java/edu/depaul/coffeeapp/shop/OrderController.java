@@ -3,6 +3,7 @@ package edu.depaul.coffeeapp.shop;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -13,7 +14,11 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/orders")
 public class OrderController {
-    private OrderService orderService = new OrderService();
+    @Autowired
+    private OrderService orderService;
+
+    @Autowired
+    private OrderRepository orderRepository;
 
     /**
      * Responsible for invoking UC-003
@@ -33,7 +38,6 @@ public class OrderController {
         OrderDTO savedOrder = orderService.placeOrder(request);
         return ResponseEntity.ok(savedOrder);
     }
-
 
     @GetMapping("/{id}")
     public ResponseEntity<OrderDTO> getOrderStatus(@PathVariable Long id) throws Exception {

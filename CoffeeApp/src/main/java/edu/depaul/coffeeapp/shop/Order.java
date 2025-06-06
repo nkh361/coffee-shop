@@ -6,9 +6,11 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
+@Table(name="orders")
 public class Order {
     @Getter
     @Id
@@ -22,8 +24,7 @@ public class Order {
 
     @Setter
     @Getter
-    @ManyToOne
-    private User customer;
+    private String customer;
 
     @Getter
     @Setter
@@ -38,9 +39,19 @@ public class Order {
     @Setter
     private LocalDateTime orderTime;
 
-    public String getCustomer() {
-        return customer.getUsername();
+    @Getter
+    @Setter
+    private double total;
+
+    public Order(String customer, List<String> items, double shopId) {
+        this.customer = customer;
+        this.items = items != null ? items : new ArrayList<>();
+        this.shopId = shopId;
+        this.orderTime = LocalDateTime.now();
+        this.status = OrderStatus.NEW;
     }
 
+    public Order() {
 
+    }
 }

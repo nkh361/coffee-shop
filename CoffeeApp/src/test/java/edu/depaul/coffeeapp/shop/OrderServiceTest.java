@@ -64,12 +64,12 @@ class OrderServiceTest {
         User testUser = new User();
         testUser.setUsername("testUser");
 
-        Order order = new Order();
-        order.setCustomer(testUser);
-        order.setStatus(OrderStatus.NEW);
-        order.getOrderTime();
-        order.setItems(List.of("Latte"));
-        order.setShopId(1);
+        Order order = new Order("testUser", List.of("Latte"), 1);
+//        order.setCustomer("testUser");
+//        order.setStatus(OrderStatus.NEW);
+//        order.getOrderTime();
+//        order.setItems(List.of("Latte"));
+//        order.setShopId(1);
 
         // mocking triggers
         when(userRepository.findByUsername("testUser")).thenReturn(Optional.of(testUser));
