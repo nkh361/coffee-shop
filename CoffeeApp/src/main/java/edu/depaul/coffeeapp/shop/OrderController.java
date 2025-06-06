@@ -5,16 +5,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * API layer for orders
  */
 @RestController
 @RequestMapping("/api/orders")
 public class OrderController {
-
-    @Autowired
-    private OrderRepository orderRepository;
-
     private OrderService orderService = new OrderService();
 
     /**
@@ -29,6 +27,13 @@ public class OrderController {
         order.setStatus(OrderStatus.NEW);
         return new ResponseEntity<>(orderDTO, HttpStatus.CREATED);
     }
+
+    @PostMapping("/checkout")
+    public ResponseEntity<OrderDTO> checkout(@RequestBody Order request) throws Exception {
+        OrderDTO savedOrder = orderService.placeOrder(request);
+        return ResponseEntity.ok(savedOrder);
+    }
+
 
     @GetMapping("/{id}")
     public ResponseEntity<OrderDTO> getOrderStatus(@PathVariable Long id) throws Exception {

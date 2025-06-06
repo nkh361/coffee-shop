@@ -1,11 +1,9 @@
 package edu.depaul.coffeeapp.shop;
 
 import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -52,10 +50,7 @@ public class CoffeeController {
             @RequestParam("query") String name,
             @RequestParam("shop") String shopId
     ) {
-//        Map<String, CoffeeItem> menu = getMenuForShop(shopId);
-//        return menu.values().stream()
-//                .filter(item -> item.getName().toLowerCase().contains(name.toLowerCase()))
-//                .collect(Collectors.toList());
+
         String lowerCaseName = name.toLowerCase();
         Map<String, CoffeeItem> currentMenu = getMenuForShop(shopId);
 
@@ -71,7 +66,7 @@ public class CoffeeController {
                     availableElsewhere.addAll(
                             entry.getValue().values().stream()
                                     .filter(item -> item.getName().toLowerCase().contains(lowerCaseName))
-                                    .collect(Collectors.toList())
+                                    .toList()
                     );
                 }
             }
@@ -83,6 +78,13 @@ public class CoffeeController {
         return result;
     }
 
+//    @PostMapping("/orders/checkout")
+//    public ResponseEntity<ReceiptDTO> checkout(@RequestBody Order request) throws Exception {
+//        ReceiptDTO receipt = orderService.checkoutOrder(request);
+//        return ResponseEntity.ok(receipt);
+//    }
+
+
     public Map<String, CoffeeItem> getMenuForShop(String shopId) {
         return coffeeMenu.getOrDefault(shopId, new HashMap<>());
     }
@@ -90,4 +92,5 @@ public class CoffeeController {
     public Map<String, Map<String, CoffeeItem>> getAllMenus() {
         return coffeeMenu;
     }
+
 }

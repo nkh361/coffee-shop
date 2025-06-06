@@ -11,58 +11,216 @@
     <option value="cafe1">Cafe 1</option>
     <option value="cafe2">Cafe 2</option>
 </select>
+<p>
+    <label for="customerName">Name:</label>
+    <input type="text" id="customerName" placeholder="Enter your name">
+</p>
 
 <input type="text" id="searchBar" placeholder="Search Coffee Item" onkeyup="searchCoffeeItem()"/>
 <ul id="results"></ul>
 
+<button onclick="checkout()">🧾 Checkout</button>
+
+<h3>🛒 Cart</h3>
+<ul id="cartItems"></ul>
+
+<h3>🧾 Receipt</h3>
+<div id="receipt"></div>
+
 <script>
+    const cart = [];
+
     function searchCoffeeItem() {
         const query = document.getElementById("searchBar").value;
         const shop = document.getElementById("shopSelect").value;
 
-          if (query.length === 0) {
-              document.getElementById("results").innerHTML = "Start typing...";
-              return;
-          }
+        if (query.length === 0) {
+            document.getElementById("results").innerHTML = "Start typing...";
+            return;
+        }
 
-          fetch(`/api/coffee/search?query=${encodeURIComponent(query)}&shop=${encodeURIComponent(shop)}`)
-              .then(response => response.json())
-              .then(data => {
-                  const resultList = document.getElementById("results");
-                  resultList.innerHTML = "";
+        fetch(`/api/coffee/search?query=${encodeURIComponent(query)}&shop=${encodeURIComponent(shop)}`)
+            .then(response => response.json())
+            .then(data => {
+                const resultList = document.getElementById("results");
+                resultList.innerHTML = "";
 
-                  if (data.here.length > 0) {
-                      const hereHeader = document.createElement("li");
-                      hereHeader.innerText = "✅ Available at your cafe:";
-                      resultList.appendChild(hereHeader);
+                if (data.here.length > 0) {
+                    const hereHeader = document.createElement("li");
+                    hereHeader.innerText = "✅ Available at your cafe:";
+                    resultList.appendChild(hereHeader);
 
-                      data.here.forEach(item => {
-                          const li = document.createElement("li");
-                          li.innerText = item.name;
-                          resultList.appendChild(li);
-                      });
-                  } else if (data.elsewhere.length > 0) {
-                      const elsewhereHeader = document.createElement("li");
-                      elsewhereHeader.innerText = "☕ Not here, but available at other cafes:";
-                      resultList.appendChild(elsewhereHeader);
+                    data.here.forEach(item => {
+                        const li = document.createElement("li");
+                        li.innerHTML = `
+            ${item.name} - $${item.price.toFixed(2)}
+            <button onclick='addToCart(${JSON.stringify(item)})'>➕ Add to Cart</button>
+          `;
+                        resultList.appendChild(li);
+                    });
+                } else if (data.elsewhere.length > 0) {
+                    const elsewhereHeader = document.createElement("li");
+                    elsewhereHeader.innerText = "☕ Not here, but available at other cafes:";
+                    resultList.appendChild(elsewhereHeader);
 
-                      data.elsewhere.forEach(item => {
-                          const li = document.createElement("li");
-                          // FIXME: shopId name fix
-                          li.innerText = `${item.name} (at ${item.shopId})`;
-                          resultList.appendChild(li);
-                      });
-                  } else {
-                      const li = document.createElement("li");
-                      li.innerText = "❌ No match found in any cafe.";
-                      resultList.appendChild(li);
-                  }
-              })
-              .catch(error => {
-                  console.error("Error during fetch:", error);
-              });
-
+                    data.elsewhere.forEach(item => {
+                        const li = document.createElement("li");
+                        li.innerHTML = `
+            ${item.name} (at ${item.shopId}) - $${item.price.toFixed(2)}
+            <button onclick='placeOrder("${item.name}", "${item.shopId}")'>➕ Add to Cart</button>
+          `;
+                        resultList.appendChild(li);
+                    });
+                } else {
+                    const li = document.createElement("li");
+                    li.innerText = "❌ No match found in any cafe.";
+                    resultList.appendChild(li);
+                }
+            })
+            .catch(error => {
+                console.error("Error during fetch:", error);
+            });
   }
+
+    function placeOrder(itemName, shopId) {
+        const customerName = document.getElementById("customerName").value;
+        if (!customerName) {
+            alert("Please enter your name before placing an order.");
+            return;
+        }
+
+        const order = {
+            customerName,
+            itemName,
+            quantity: 1,
+            shopId
+        };
+
+        fetch("/api/orders", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(order)
+        })
+            .then(res => {
+                if (!res.ok) throw new Error("Failed to place order");
+                return res.json();
+            })
+            .then(data => {
+                alert(`✅ Order placed! Order ID: ${data.id}`);
+            })
+            .catch(err => {
+                console.error(err);
+                alert("❌ Failed to place order.");
+            });
+    }
+
+    function addToCart(item) {
+        cart.push(item);
+        renderCart(cart);
+    }
+
+    function renderCart() {
+        const cartList = document.getElementById("cartItems");
+        cartList.innerHTML = "";
+
+        cart.forEach((item, index) => {
+            const li = document.createElement("li");
+            li.innerText = `${item.name} (${item.shopId}) - $${item.price.toFixed(2)}`;
+            cartList.appendChild(li);
+        });
+    }
+
+    function checkout() {
+        const customerName = document.getElementById("customerName").value;
+        if (!customerName) {
+            alert("Please enter your name.");
+            return;
+        }
+
+        const orderRequest = {
+            items: cart,
+            customerName: customerName
+        };
+
+        fetch("/api/orders/checkout", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(orderRequest)
+        })
+            .then(res => res.json())
+            .then(order => {
+                cart.length = 0; // clear the cart
+                renderCart();
+                displayReceipt(order);
+            });
+    }
+
+    function displayReceipt(order) {
+        const receiptDiv = document.getElementById("receipt");
+        if (!receiptDiv) return;
+
+        receiptDiv.innerHTML = `
+        <h4>Order #${order.id}</h4>
+        <p><strong>Customer:</strong> ${order.customerName}</p>
+        <p><strong>Order Time:</strong> ${new Date(order.orderTime).toLocaleString()}</p>
+        <p><strong>Status:</strong> ${order.status}</p>
+
+        <table class="receipt-table">
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Shop</th>
+                    <th>Price</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${order.items.map(item => `
+                    <tr>
+                        <td>${item.name}</td>
+                        <td>${item.shopId}</td>
+                        <td>$${item.price.toFixed(2)}</td>
+                    </tr>
+                `).join("")}
+                <tr class="receipt-total">
+                    <td colspan="2" class="receipt-total-label">Total:</td>
+                    <td>$${order.total.toFixed(2)}</td>
+                </tr>
+            </tbody>
+        </table>
+    `;
+    }
+
+
+
 </script>
 </body>
 </html>
+
+<style>
+    .receipt-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+    }
+    .receipt-table th {
+        background-color: #f2f2f2;
+        text-align: left;
+        padding: 8px;
+        border: 1px solid #ddd;
+    }
+    .receipt-table td {
+        padding: 8px;
+        border: 1px solid #ddd;
+    }
+    .receipt-table tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+    .receipt-total {
+        font-weight: bold;
+    }
+    .receipt-total-label {
+        text-align: right;
+    }
+</style>
