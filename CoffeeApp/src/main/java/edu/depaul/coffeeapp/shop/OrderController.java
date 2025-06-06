@@ -1,6 +1,5 @@
 package edu.depaul.coffeeapp.shop;
 
-import edu.depaul.coffeeapp.shop.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +15,7 @@ public class OrderController {
     @Autowired
     private OrderRepository orderRepository;
 
-    private OrderService orderService;
+    private OrderService orderService = new OrderService();
 
     /**
      * Responsible for invoking UC-003
@@ -27,6 +26,7 @@ public class OrderController {
     @PostMapping
     public ResponseEntity<OrderDTO> placeOrder(@RequestBody Order order) throws Exception {
         OrderDTO orderDTO = orderService.placeOrder(order);
+        order.setStatus(OrderStatus.NEW);
         return new ResponseEntity<>(orderDTO, HttpStatus.CREATED);
     }
 

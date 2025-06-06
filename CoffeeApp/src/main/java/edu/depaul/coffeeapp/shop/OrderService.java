@@ -1,11 +1,17 @@
 package edu.depaul.coffeeapp.shop;
 
 import edu.depaul.coffeeapp.notification.NotificationService;
+import edu.depaul.coffeeapp.security.User;
+import edu.depaul.coffeeapp.security.UserRepository;
 import org.aspectj.weaver.ast.Or;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 /**
  * Business logic for shop system
@@ -16,6 +22,10 @@ public class OrderService {
     private OrderRepository orderRepository;
     @Autowired
     private NotificationService notificationService;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private CoffeeController coffeeController;
 
     /**
      * Responsible for triggering the order mechanism.
@@ -27,6 +37,42 @@ public class OrderService {
      */
     public OrderDTO placeOrder(Order order) throws Exception {
         try {
+            Optional<User> customer = userRepository.findByUsername(order.getCustomer());
+            if (customer.isEmpty()) throw new Exception("Customer not found");
+
+            Map<String, CoffeeItem> shopMenu = coffeeController.getMenuForShop("cafe" + (int) order.getShopId());
+            if (shopMenu.isEmpty()) throw new Exception("Shop not found");
+
+            // item validation
+            List<String> validItems = new ArrayList<>();
+            for (String item : order.getItems()) {
+                if (shopMenu.containsKey(item)) {
+                    validItems.add(item);
+                } else {
+                    throw new Exception("Item not found");
+                }
+            }
+
+            if (validItems.isEmpty()) throw new Exception("Items not found");
+
+            // update the fields
+            order.setOrderTime(LocalDateTime.now());
+            order.setItems(validItems);
+            order.setStatus(OrderStatus.NEW);
+
+            /**
+             * TODO: add drop down menu for shop selection, then the order service is only serving for the current shop
+             */
+
+            /**
+            for (Map.Entry<String, Map<String, CoffeeItem>> entry : coffeeMenuService.getAllMenus().entrySet()) {
+                if (entry.getValue().containsKey(itemName)) {
+                    System.out.println("Item " + itemName + " not found in current shop, but available at: " + entry.getKey());
+                }
+            }
+             */
+
+
             order.setOrderTime(LocalDateTime.now());
             Order saved = orderRepository.save(order);
 
@@ -35,7 +81,8 @@ public class OrderService {
                     saved.getCustomer(),
                     saved.getShopId(),
                     saved.getOrderTime(),
-                    saved.getItems()
+                    saved.getItems(),
+                    saved.getStatus()
             );
         } catch (Exception e) {
             throw new Exception("Order could not be placed: " + e.getMessage());

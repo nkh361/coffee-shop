@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/coffee")
@@ -36,28 +37,46 @@ public class CoffeeController {
         );
         cafe1.put("Latte", cafe1Latte);
         cafe1.put("Espresso", cafe1Espresso);
-        coffeeMenu.put("Cafe1", cafe1);
+        coffeeMenu.put("cafe1", cafe1);
 
         Map<String, CoffeeItem> cafe2 = new HashMap<>();
         CoffeeItem cafe2Latte = new CoffeeItem(
                 "Caramel latte", 2.99, "espresso and milk", 123123, "cafe2"
         );
         cafe2.put("Caramel Latte", cafe2Latte);
-        coffeeMenu.put("Cafe2", cafe2);
+        coffeeMenu.put("cafe2", cafe2);
     }
 
+//    @GetMapping("/search")
+//    public ResponseEntity<List<CoffeeItem>> searchCoffee(@RequestParam String name) {
+//        String lowerCaseName = name.toLowerCase();
+//        List<CoffeeItem> results = new ArrayList<>();
+//        for (Map<String, CoffeeItem> shopMenu : coffeeMenu.values()) {
+//            for (CoffeeItem coffeeItem : shopMenu.values()) {
+//                if (coffeeItem.getName().toLowerCase().contains(lowerCaseName)) {
+//                    results.add(coffeeItem);
+//                }
+//            }
+//        }
+//        return ResponseEntity.ok(results);
+//
+//    }
     @GetMapping("/search")
-    public ResponseEntity<List<CoffeeItem>> searchCoffee(@RequestParam String name) {
-        String lowerCaseName = name.toLowerCase();
-        List<CoffeeItem> results = new ArrayList<>();
-        for (Map<String, CoffeeItem> shopMenu : coffeeMenu.values()) {
-            for (CoffeeItem coffeeItem : shopMenu.values()) {
-                if (coffeeItem.getName().toLowerCase().contains(lowerCaseName)) {
-                    results.add(coffeeItem);
-                }
-            }
-        }
-        return ResponseEntity.ok(results);
+    public List<CoffeeItem> searchCoffee(
+            @RequestParam("query") String name,
+            @RequestParam("shop") String shopId
+    ) {
+        Map<String, CoffeeItem> menu = getMenuForShop(shopId);
+        return menu.values().stream()
+                .filter(item -> item.getName().toLowerCase().contains(name.toLowerCase()))
+                .collect(Collectors.toList());
+    }
 
+    public Map<String, CoffeeItem> getMenuForShop(String shopId) {
+        return coffeeMenu.getOrDefault(shopId, new HashMap<>());
+    }
+
+    public Map<String, Map<String, CoffeeItem>> getAllMenus() {
+        return coffeeMenu;
     }
 }

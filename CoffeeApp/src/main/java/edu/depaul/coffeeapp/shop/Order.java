@@ -21,14 +21,17 @@ public class Order {
     private OrderStatus status;
 
     @Setter
+    @Getter
     @ManyToOne
     private User customer;
 
     @Getter
+    @Setter
     @ElementCollection
     private List<String> items;
 
     @Getter
+    @Setter
     private double shopId;
 
     @Getter
@@ -38,5 +41,6 @@ public class Order {
     public String getCustomer() {
         return customer.getUsername();
     }
+
 
 }

@@ -16,4 +16,5 @@ public class OrderDTO {
     private double shopId;
     private LocalDateTime orderTime;
     private List<String> items;
+    private OrderStatus orderStatus;
 }
