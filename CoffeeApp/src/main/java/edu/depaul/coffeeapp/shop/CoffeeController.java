@@ -40,9 +40,17 @@ public class CoffeeController {
 
         Map<String, CoffeeItem> cafe2 = new HashMap<>();
         CoffeeItem cafe2Latte = new CoffeeItem(
-                "Caramel latte", 2.99, "espresso and milk", 123123, "cafe2"
+                "Caramel latte", 2.99, "Espresso and milk", 111111, "cafe2"
+        );
+        CoffeeItem cafe2Matcha = new CoffeeItem(
+                "Matcha latte", 2.99, "Matcha and milk", 111111, "cafe2"
+        );
+        CoffeeItem cafe2Banana = new CoffeeItem(
+                "Banana oatmilk latte", 2.99, "Espresso, banana extract and oat milk", 111111, "cafe2"
         );
         cafe2.put("Caramel Latte", cafe2Latte);
+        cafe2.put("Matcha Latte", cafe2Matcha);
+        cafe2.put("Banana Latte", cafe2Banana);
         coffeeMenu.put("cafe2", cafe2);
     }
 
